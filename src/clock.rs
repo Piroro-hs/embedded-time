@@ -4,7 +4,10 @@ use crate::{
     duration::Duration, fixed_point::FixedPoint, fraction::Fraction, instant::Instant,
     time_int::TimeInt, timer::param, timer::Timer,
 };
-use core::hash::Hash;
+use core::{
+    fmt::{self, Formatter},
+    hash::Hash,
+};
 
 /// Potential `Clock` errors
 #[non_exhaustive]
@@ -56,5 +59,41 @@ pub trait Clock: Sized {
         Dur: FixedPoint,
     {
         Timer::<param::None, param::None, Self, Dur>::new(&self, duration)
+    }
+}
+
+/// A duration unit type for specific [`Clock`](clock/trait.Clock.html)
+#[derive(Hash, Debug, Default)]
+pub struct ClockDuration<Clock: crate::Clock>(pub Clock::T);
+
+impl<Clock: crate::Clock> Clone for ClockDuration<Clock> {
+    fn clone(&self) -> Self {
+        Self(self.0)
+    }
+}
+
+impl<Clock: crate::Clock> Copy for ClockDuration<Clock> {}
+
+impl<Clock: crate::Clock> Duration for ClockDuration<Clock> {}
+
+impl<Clock: crate::Clock> FixedPoint for ClockDuration<Clock> {
+    type T = Clock::T;
+    const SCALING_FACTOR: Fraction = Clock::SCALING_FACTOR;
+
+    /// See [Constructing a duration](trait.Duration.html#constructing-a-duration)
+    fn new(value: Self::T) -> Self {
+        Self(value)
+    }
+
+    /// See [Get the integer part](trait.Duration.html#get-the-integer-part)
+    fn integer(&self) -> &Self::T {
+        &self.0
+    }
+}
+
+impl<Clock: crate::Clock> fmt::Display for ClockDuration<Clock> {
+    /// See [Formatting](trait.Duration.html#formatting)
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        fmt::Display::fmt(&self.0, f)
     }
 }
