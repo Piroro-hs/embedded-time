@@ -1,12 +1,13 @@
 //! Abstraction for hardware timers/clocks
 
 use crate::{
-    duration::Duration, fixed_point::FixedPoint, fraction::Fraction, instant::Instant,
-    time_int::TimeInt, timer::param, timer::Timer,
+    delay::Delay, duration::Duration, fixed_point::FixedPoint, fraction::Fraction,
+    instant::Instant, time_int::TimeInt, timer::param, timer::Timer,
 };
 use core::{
     fmt::{self, Formatter},
     hash::Hash,
+    ops::FnMut,
 };
 
 /// Potential `Clock` errors
@@ -59,6 +60,16 @@ pub trait Clock: Sized {
         Dur: FixedPoint,
     {
         Timer::<param::None, param::None, Self, Dur>::new(&self, duration)
+    }
+
+    fn delay(&self) -> Delay<Self, fn()> {
+        #[inline(always)]
+        fn nop() {}
+        Delay::new(&self, nop)
+    }
+
+    fn delay_with<Fn: FnMut()>(&self, wait: Fn) -> Delay<Self, Fn> {
+        Delay::new(&self, wait)
     }
 }
 

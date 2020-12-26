@@ -277,6 +277,7 @@
 #![deny(broken_intra_doc_links)]
 
 pub mod clock;
+mod delay;
 pub mod duration;
 pub mod fixed_point;
 pub mod fraction;

@@ -23,6 +23,7 @@ bench = false
 members = ["examples"]
 
 [dependencies]
+embedded-hal = "0.2.4"
 num = { version = "0.3.0", default-features = false }
 
 [dev-dependencies]
